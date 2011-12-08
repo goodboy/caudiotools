@@ -41,10 +41,6 @@ struct wave_fmt_chunk{
     char fmt_extra[];
 } __attribute__ ((__packed__));
 
-/*struct wave_data_chunk {
-    struct chunk_header h;
-} __attribute__ ((__packed__));*/
-
 struct wave_toc {
     int32_t id;
     int32_t length;
@@ -61,7 +57,6 @@ struct wave {
     char *buffer;
     char *bufferend;
     char *ibuff;
-//    struct wave_data_chunk *data;
 };
 
 static void
@@ -123,13 +118,11 @@ read_chunk(wave_t *wave, int id)
     char *chunk;
     struct wave_toc *entry;
     size_t chunk_size;
-    //int32_t extra;
 
     for (entry = wave->toc; entry->id != id; entry = entry->next);
 
     if (!entry)
     return NULL;
-    //extra = entry->length;
    
     // if its the data only read the header.
     if (id == DATA_CHUNK){
@@ -260,27 +253,18 @@ waveclose(wave_t *wave)
 
 /* Use this function for reading pcm data.  Do not expect
 things like channels or buffering to be handled for you.*/
-// should return number of bytes read!!!
-// for loop through and copy all the values. stick 3 ptrs in wave struct. 
 int 
 getpcm(wave_t *wave, int length, char **ptr)
 {
-    //struct wave_toc *entry;
     int16_t channels = wave->fmt->channels;
     int16_t blockalign = wave->fmt->block_align;
     int16_t samplealign = blockalign/channels;
     int bufferlength = wave->bufferend - wave->buffer;
 
-    //int16_t *sample;
-
-    //short byteoffset = (length * blockalign) % bufferlength; 
     int isample;
     int dim;
     int ibyte;
     int bytes = 0;
-
-    //char array[channels][length * blockalign];
-   
 
     for(isample = 0; isample < length; isample++ ){
 
@@ -298,15 +282,13 @@ getpcm(wave_t *wave, int length, char **ptr)
             }
             bytes += samplealign;
         }
-        //bytes += blockalign;
         wave->ibuff += blockalign;
     }
-    //sample = (int16_t *)array;
-    //ptr = array;
     return bytes;
 }
 
-char **mkbuffer(wave_t *wave, int length)
+char **
+mkbuffer(wave_t *wave, int length)
 {
     char **ptr = NULL;
     int16_t channels = wave->fmt->channels;

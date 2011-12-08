@@ -84,6 +84,7 @@ main(int argc, char *argv[])
     }
 
     free(pcm[0]);
+    free(pcm);
 
     print_waveinfo(wave);
 
