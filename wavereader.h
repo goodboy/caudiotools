@@ -39,10 +39,8 @@ wave_t *waveopen(FILE *file);
  Closes the wave file and frees memory.
   ********************************************************************/
 int waveclose(wave_t *wave);
-
-//int32_t *streampcm(void *ptr, size_t length, int16_t channel, wave_t *wave);
 int getpcm(wave_t *wave, int length, char **ptr);
-//int *streampcm(int length, int16_t channel, wave_t *wave);
+char **mkbuffer(wave_t *wave, int length);
 int wavegetprop(wave_t *wave, wave_prop_t prop, void *data);
 int waveseek(wave_t *wave, long offset, int whence);
 int waveeof(wave_t *wave);

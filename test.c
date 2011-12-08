@@ -52,7 +52,6 @@ main(int argc, char *argv[])
 {
     FILE *fd;
     wave_t *wave;
-    char **pcm = NULL;
     int length = 16;
     int bytesread;
 
@@ -70,6 +69,9 @@ main(int argc, char *argv[])
         fprintf(stderr, "Couldn't open \"%s\" as a .wav file.\n", argv[1]);
         exit(EXIT_FAILURE);
     }
+
+    char **pcm = mkbuffer(wave, length);
+
     if (!(bytesread = getpcm(wave, length, pcm))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
@@ -80,6 +82,8 @@ main(int argc, char *argv[])
     for(int i = 0; i < length; i++){
         printf("sample %d = %d \n", i, sample[0][i]);
     }
+
+    free(pcm[0]);
 
     print_waveinfo(wave);
 

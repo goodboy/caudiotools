@@ -274,18 +274,12 @@ getpcm(wave_t *wave, int length, char **ptr)
     //int16_t *sample;
 
     //short byteoffset = (length * blockalign) % bufferlength; 
-    //char *lastsample; 
     int isample;
     int dim;
     int ibyte;
     int bytes = 0;
 
     //char array[channels][length * blockalign];
-    ptr = (char **)malloc(channels * sizeof(char *));
-    char *data = (char *)calloc(length, blockalign);
-    for(dim = 0; dim < channels; dim++){
-        ptr[dim] = &(data[(length * samplealign) * dim]); 
-    }
    
 
     for(isample = 0; isample < length; isample++ ){
@@ -295,7 +289,6 @@ getpcm(wave_t *wave, int length, char **ptr)
             fseek(wave->fp, bufferlength, SEEK_CUR);
             fread(wave->buffer, bufferlength, 1, wave->fp);
             wave->ibuff = wave->buffer;
-            //lastsample = wave->ibuff + byteoffset;
         }
         for(dim = 0; dim < channels; dim++){
 
@@ -311,6 +304,20 @@ getpcm(wave_t *wave, int length, char **ptr)
     //sample = (int16_t *)array;
     //ptr = array;
     return bytes;
+}
+
+char **mkbuffer(wave_t *wave, int length)
+{
+    char **ptr = NULL;
+    int16_t channels = wave->fmt->channels;
+    int16_t blockalign = wave->fmt->block_align;
+    int16_t samplealign = blockalign/channels;
+
+    ptr = malloc(channels * sizeof(char *));
+    for(int dim = 0; dim < channels; dim++){
+        ptr[dim] = calloc(length, samplealign);
+    }
+    return ptr;
 }
 
 int
