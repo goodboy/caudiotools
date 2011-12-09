@@ -52,7 +52,6 @@ main(int argc, char *argv[])
 {
     FILE *fd;
     wave_t *wave;
-    int length = 16;
     int bytesread;
 
     if (argc < 2) {
@@ -70,17 +69,29 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    int length = 8002;
     char **pcm = mkbuffer(wave, length);
 
     if (!(bytesread = getpcm(wave, length, pcm))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
+    //free(pcm[0]);
+    /*
+    free(pcm);
+    length = 512;
+    pcm = mkbuffer(wave, length);
+
+    if (!(bytesread = getpcm(wave, length, pcm))) {
+        fprintf(stderr, "Couldn't stream pcm data!\n");
+        exit(EXIT_FAILURE);
+    }
+    */
     int16_t **sample; 
     sample = (int16_t **)pcm; 
 
     for(int i = 0; i < length; i++){
-        printf("sample %d = %d \n", i, sample[0][i]);
+        printf("sample %d = %i \n", i, sample[0][i]);
     }
 
     free(pcm[0]);
