@@ -54,7 +54,7 @@ struct wave {
     struct chunk_header *dataheader;
     struct wave_toc *toc;
     struct wave_fmt_chunk *fmt;
-    long buffersread;
+    long pcmsread;
     long internalstart;
     char *buffer;
     char *bufferend;
@@ -133,17 +133,11 @@ read_chunk(wave_t *wave, int id)
         wave->dataheader = malloc(chunk_size);
 
         fseek(wave->fp, entry->offset, SEEK_SET);
-        printf("'start of data' = %ld bytes read\n", ftell(wave->fp));
         fread(wave->dataheader, chunk_size, 1, wave->fp);
-        printf("'internalstart' = %ld \n", ftell(wave->fp));
         wave->internalstart = ftell(wave->fp);
-        //fseek(wave->fp, chunk_size, SEEK_CUR);
-        //printf("'seek' bytes read = %ld \n", ftell(wave->fp));
         fread(wave->buffer, wave->bufferend - wave->buffer, 1, wave->fp);
-
-        printf("after buffer read = %ld \n", ftell(wave->fp));
-        wave->buffersread = ftell(wave->fp) - wave->internalstart; 
-        printf("buffers read = %ld \n", wave->buffersread);
+        wave->pcmsread = ftell(wave->fp) - wave->internalstart; 
+        printf("buffer bytes read = %ld \n", wave->pcmsread);
 
         return NULL;
     }else{
@@ -292,12 +286,10 @@ getpcm(wave_t *wave, int length, char **ptr)
 
         if(wave->ibuff >= wave->bufferend){
             //reload internal buffer
-            //fseek(wave->fp, bufferlength, SEEK_CUR);
             fread(wave->buffer, bufferlength, 1, wave->fp);
             wave->ibuff = wave->buffer;
-            printf("bytes read = %ld \n", ftell(wave->fp));
-            wave->buffersread = ftell(wave->fp) - wave->internalstart; 
-            printf("bytes read = %ld \n", wave->buffersread);
+            wave->pcmsread = ftell(wave->fp) - wave->internalstart; 
+            printf("pcm bytes read = %ld \n", wave->pcmsread);
         }
     }
     return bytes;
