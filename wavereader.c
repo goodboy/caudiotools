@@ -232,7 +232,6 @@ waveopen(FILE *fp)
 
     /* this read fills the buffer and grabs the data header */
     read_chunk(wave, DATA_CHUNK);
-    //wave->dataheader = *(struct chunk_header *)(read_chunk(wave, DATA_CHUNK));
     printf(">> DEBUG: data frame %d bytes\n", wave->dataheader->length);
 
     return wave;
@@ -307,20 +306,16 @@ getpcm(wave_t *wave, buffer_t *buffer)//char **ptr)
 buffer_t  * //char **
 mkbuffer(wave_t *wave, int length)
 {
-    //char **ptr = NULL;
     int16_t channels = wave->fmt->channels;
     int16_t blockalign = wave->fmt->block_align;
     int16_t samplealign = blockalign/channels;
     buffer_t *buffer = malloc(sizeof(buffer_t));
     buffer->length = length;
 
-    //ptr = malloc(channels * sizeof(char *));
     buffer->pcm = malloc(channels * sizeof(char *));
     for(int dim = 0; dim < channels; dim++){
-        //ptr[dim] = calloc(length, samplealign);
         buffer->pcm[dim]= calloc(length, samplealign);
     }
-    //return ptr;
     return buffer;
 }
 
