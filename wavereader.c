@@ -358,7 +358,7 @@ wavegetprop(wave_t *wave, wave_prop_t prop, void *data)
             *(int16_t *)data = wave->fmt->bits_per_sample;
             return 0;
         case WAVE_LENGTH:
-            *(int32_t *)data = wave->dataheader->length / (wave->fmt->bits_per_sample / 8); /* / wave->fmt->sample_rate;*/
+            *(int32_t *)data = wave->dataheader->length / wave->fmt->blockalign; /* / wave->fmt->sample_rate;*/
             return 0;
         default:
             /* property not defined*/
