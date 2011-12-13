@@ -333,6 +333,7 @@ rmbuffer(wave_t *wave, buffer_t *buffer)
     }
     //free(ptr);
     free(buffer->pcm);
+    free(buffer);
     return 0;
 }    
 
