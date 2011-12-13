@@ -19,16 +19,6 @@ print_waveinfo(wave_t *wave)
     wavegetprop(wave, WAVE_BITS_PER_SAMPLE, &bits_per_sample);
     wavegetprop(wave, WAVE_LENGTH, &length);
 
-    printf("size: %d bytes\n", size);
-    printf("channels: %d bit", channels);
-
-    if (channels == 1)
-        printf(" (mono)\n");
-    else if (channels == 2)
-        printf(" (stereo)\n");
-    else
-        printf("\n");
-
     if (pcm == 1) {
         int hours, minutes, seconds = length / sample_rate;
         minutes = seconds / 60;
@@ -40,6 +30,8 @@ print_waveinfo(wave_t *wave)
     } else
         printf("compressed wave file\n");
 
+    printf("size: %d bytes\n", size);
+    printf("channels: %d", channels);
     printf("sample rate: %d Hz\n", sample_rate);
     printf("average bytes/second %d\n", bytes_per_second);
     printf("block align: %d\n", block_align);
@@ -71,23 +63,12 @@ main(int argc, char *argv[])
     }
 
     wavegetprop(wave, WAVE_LENGTH, &length);
-    buffer = mkbuffer(wave, length + 18);
+    buffer = mkbuffer(wave, length);
 
     if (!(bytesread = getpcm(wave, buffer))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
-   /* 
-    rmbuffer(wave, pcm);
-
-    length = 30;
-    pcm = mkbuffer(wave, length);
-
-    if (!(bytesread = getpcm(wave, length, pcm))) {
-        fprintf(stderr, "Couldn't stream pcm data!\n");
-        exit(EXIT_FAILURE);
-    }
-  */ 
     int16_t **sample; 
     sample = (int16_t **)buffer->pcm; 
 
