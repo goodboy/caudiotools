@@ -71,7 +71,7 @@ main(int argc, char *argv[])
     }
 
     wavegetprop(wave, WAVE_LENGTH, &length);
-    buffer = mkbuffer(wave, buffer, length + 18);
+    buffer = mkbuffer(wave, length + 18);
 
     if (!(bytesread = getpcm(wave, buffer))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
@@ -91,7 +91,7 @@ main(int argc, char *argv[])
     int16_t **sample; 
     sample = (int16_t **)buffer->pcm; 
 
-    for(int i = 0; i < length; i++){
+    for(int i = 0; i < buffer->length; i++){
         printf("sample %d = %i \n", i, sample[0][i]);
     }
 

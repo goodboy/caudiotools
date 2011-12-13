@@ -265,6 +265,7 @@ getpcm(wave_t *wave, buffer_t *buffer)//char **ptr)
     int bufferlength = wave->bufferend - wave->buffer;
     int samplesleft = (wave->dataheader->length - wave->pcmsread) / blockalign;
 
+    int length = buffer->length;
     int isample;
     int dim;
     int ibyte;
@@ -286,7 +287,7 @@ getpcm(wave_t *wave, buffer_t *buffer)//char **ptr)
             for(ibyte = 0; ibyte < samplealign; ibyte++){   
                 // each byte
 
-                ptr[dim][ibyte+isample*samplealign] = *(wave->ibuff + (ibyte + dim*samplealign));
+                buffer->pcm[dim][ibyte+isample*samplealign] = *(wave->ibuff + (ibyte + dim*samplealign));
                 
             }
             bytes += samplealign;
@@ -303,16 +304,18 @@ getpcm(wave_t *wave, buffer_t *buffer)//char **ptr)
     return bytes;
 }
 
-buffer_t  *
-mkbuffer(wave_t *wave, buffer_t *buffer, int length)
+buffer_t  * //char **
+mkbuffer(wave_t *wave, int length)
 {
     //char **ptr = NULL;
-    buffer->length = length;
     int16_t channels = wave->fmt->channels;
     int16_t blockalign = wave->fmt->block_align;
     int16_t samplealign = blockalign/channels;
+    buffer_t *buffer = malloc(sizeof(buffer_t));
+    buffer->length = length;
 
     //ptr = malloc(channels * sizeof(char *));
+    buffer->pcm = malloc(channels * sizeof(char *));
     for(int dim = 0; dim < channels; dim++){
         //ptr[dim] = calloc(length, samplealign);
         buffer->pcm[dim]= calloc(length, samplealign);
