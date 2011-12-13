@@ -59,6 +59,7 @@ struct wave {
     char *buffer;
     char *bufferend;
     char *ibuff;
+    size_t bufferlength;
 };
 
 static void
@@ -135,7 +136,7 @@ read_chunk(wave_t *wave, int id)
         fseek(wave->fp, entry->offset, SEEK_SET);
         fread(wave->dataheader, chunk_size, 1, wave->fp);
         wave->internalstart = ftell(wave->fp);
-        fread(wave->buffer, wave->bufferend - wave->buffer, 1, wave->fp);
+        fread(wave->buffer, (size_t)wave->fmt->block_align, wave->bufferlength, wave->fp);
 
         return NULL;
     }else{
@@ -188,7 +189,6 @@ waveopen(FILE *fp)
 {
     wave_t *wave = NULL;
     int32_t header[3];
-    int16_t numofsamples = 512; // # of samples in internal buffer
 
     /* check for magic numbers */
     fread(header, sizeof(int32_t), 3, fp);
@@ -205,12 +205,12 @@ waveopen(FILE *fp)
     wave->length = header[1];
     wave->toc = NULL;
     wave->fmt = NULL;
+    wave->bufferlength = 512; // # of samples in internal buffer
 
     build_toc(wave);
     dump_toc(wave);
 
     wave->fmt = read_chunk(wave, FMT_CHUNK);
-    
     if (wave->fmt->channels > 2){
         fprintf(stderr, "wavreader does not support more than stereo \n");
         return NULL;
@@ -226,8 +226,8 @@ waveopen(FILE *fp)
     /* allocate mem for internal buffer of 512 samples and set pointer to 
     end : 512 samples are allocated regardless of the number of channels */
 
-    wave->buffer = malloc(numofsamples * (wave->fmt->block_align));
-    wave->bufferend = wave->buffer + (numofsamples * (wave->fmt->block_align));
+    wave->buffer = malloc(wave->bufferlength * wave->fmt->block_align);
+    wave->bufferend = wave->buffer + (wave->bufferlength * wave->fmt->block_align);
     wave->ibuff = wave->buffer;
 
     /* this read fills the buffer and grabs the data header */
@@ -261,7 +261,6 @@ getpcm(wave_t *wave, buffer_t *buffer)//char **ptr)
     int16_t channels = wave->fmt->channels;
     int16_t blockalign = wave->fmt->block_align;
     int16_t samplealign = blockalign/channels;
-    int bufferlength = wave->bufferend - wave->buffer;
     int samplesleft = (wave->dataheader->length - wave->pcmsread) / blockalign;
 
     int length = buffer->length;
@@ -296,24 +295,22 @@ getpcm(wave_t *wave, buffer_t *buffer)//char **ptr)
 
         if(wave->ibuff >= wave->bufferend){
             //reload internal buffer
-            fread(wave->buffer, bufferlength, 1, wave->fp);
+            fread(wave->buffer, (size_t)blockalign, wave->bufferlength, wave->fp);
             wave->ibuff = wave->buffer;
         }
     }
     return bytes;
 }
 
-buffer_t  * //char **
+buffer_t  * 
 mkbuffer(wave_t *wave, int length)
 {
-    int16_t channels = wave->fmt->channels;
-    int16_t blockalign = wave->fmt->block_align;
-    int16_t samplealign = blockalign/channels;
+    int16_t samplealign = wave->fmt->block_align/wave->fmt->channels;
     buffer_t *buffer = malloc(sizeof(buffer_t));
     buffer->length = length;
 
-    buffer->pcm = malloc(channels * sizeof(char *));
-    for(int dim = 0; dim < channels; dim++){
+    buffer->pcm = malloc(wave->fmt->channels* sizeof(char *));
+    for(int dim = 0; dim < wave->fmt->channels; dim++){
         buffer->pcm[dim]= calloc(length, samplealign);
     }
     return buffer;
@@ -323,10 +320,8 @@ int
 rmbuffer(wave_t *wave, buffer_t *buffer)
 {
     for(short dim = 0; dim < wave->fmt->channels; dim++){
-        //free(ptr[dim]);
         free(buffer->pcm[dim]);
     }
-    //free(ptr);
     free(buffer->pcm);
     free(buffer);
     return 0;
