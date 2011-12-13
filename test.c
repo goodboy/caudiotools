@@ -30,14 +30,13 @@ print_waveinfo(wave_t *wave)
         printf("\n");
 
     if (pcm == 1) {
-        int hours, minutes, seconds = length;
+        int hours, minutes, seconds = length / sample_rate;
         minutes = seconds / 60;
         hours = minutes / 60;
         seconds %= 60;
         minutes %= 60;
 
-        printf("uncompressed wave file:\n");
-        printf(" > length (approx): %02dh %02dm %02ds\n", hours, minutes, seconds);
+        printf("uncompressed wave file: length (approx): %02dh %02dm %02ds\n", hours, minutes, seconds);
     } else
         printf("compressed wave file\n");
 
@@ -69,17 +68,19 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    int length = 15490;
+    int length;
+    wavegetprop(wave, WAVE_LENGTH, &length);
+    length = length + 18;
     char **pcm = mkbuffer(wave, length);
 
     if (!(bytesread = getpcm(wave, length, pcm))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
-    //free(pcm[0]);
     
-    free(pcm);
-    length = 512;
+    rmbuffer(wave, pcm);
+
+    length = 30;
     pcm = mkbuffer(wave, length);
 
     if (!(bytesread = getpcm(wave, length, pcm))) {
@@ -94,11 +95,9 @@ main(int argc, char *argv[])
         printf("sample %d = %i \n", i, sample[0][i]);
     }
 
-    free(pcm[0]);
-    free(pcm);
-
     print_waveinfo(wave);
 
+    rmbuffer(wave, pcm);
     waveclose(wave);
     fclose(fd);
     return 0;

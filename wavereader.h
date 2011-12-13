@@ -18,7 +18,7 @@ typedef enum {
     WAVE_BLOCK_ALIGN,
     WAVE_BITS_PER_SAMPLE,
     WAVE_BYTES_IN_DATA,
-    WAVE_LENGTH,
+    WAVE_LENGTH,                // number of samples in file
 } wave_prop_t;
 
 /**********************************************************************
@@ -41,6 +41,7 @@ wave_t *waveopen(FILE *file);
 int waveclose(wave_t *wave);
 int getpcm(wave_t *wave, int length, char **ptr);
 char **mkbuffer(wave_t *wave, int length);
+int rmbuffer(wave_t *wave, char **ptr);
 int wavegetprop(wave_t *wave, wave_prop_t prop, void *data);
 int waveseek(wave_t *wave, long offset, int whence);
 int waveeof(wave_t *wave);

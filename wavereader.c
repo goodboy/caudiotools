@@ -136,8 +136,6 @@ read_chunk(wave_t *wave, int id)
         fread(wave->dataheader, chunk_size, 1, wave->fp);
         wave->internalstart = ftell(wave->fp);
         fread(wave->buffer, wave->bufferend - wave->buffer, 1, wave->fp);
-        wave->pcmsread = ftell(wave->fp) - wave->internalstart; 
-        printf("buffer bytes read = %ld \n", wave->pcmsread);
 
         return NULL;
     }else{
@@ -230,6 +228,7 @@ wave_t *waveopen(FILE *fp)
     wave->buffer = malloc(numofsamples * (wave->fmt->block_align));
     wave->bufferend = wave->buffer + (numofsamples * (wave->fmt->block_align));
     wave->ibuff = wave->buffer;
+
     /* this read fills the buffer and grabs the data header */
     read_chunk(wave, DATA_CHUNK);
     //wave->dataheader = *(struct chunk_header *)(read_chunk(wave, DATA_CHUNK));
@@ -250,7 +249,6 @@ waveclose(wave_t *wave)
     }
 
     free(wave->fmt);
-//    free(wave->data);
     free(wave);
     return 0;
 }
@@ -264,32 +262,39 @@ getpcm(wave_t *wave, int length, char **ptr)
     int16_t blockalign = wave->fmt->block_align;
     int16_t samplealign = blockalign/channels;
     int bufferlength = wave->bufferend - wave->buffer;
+    int samplesleft = (wave->dataheader->length - wave->pcmsread) / blockalign;
 
     int isample;
     int dim;
     int ibyte;
     int bytes = 0;
-    int16_t *value;
-    for(isample = 0; isample < length; isample++ ){
 
-        for(dim = 0; dim < channels; dim++){
+    if(length > samplesleft){ 
+        length = samplesleft; 
+        perror("Requested length longer then file");
+        printf("Output truncated to %d samples \n", samplesleft);
+    }
 
-            for(ibyte = 0; ibyte < samplealign; ibyte++){
+    // Copy data into ptr
+    for(isample = 0; isample < length; isample++ ){     // each sample
+
+        for(dim = 0; dim < channels; dim++){            // each channel
+
+            for(ibyte = 0; ibyte < samplealign; ibyte++){   // each byte
 
                 ptr[dim][ibyte+isample*samplealign] = *(wave->ibuff + (ibyte + dim*samplealign));
                 
             }
             bytes += samplealign;
-            value = (int16_t *) wave->ibuff;//debug var
         }
         wave->ibuff += blockalign;
+        wave->pcmsread += blockalign;
 
         if(wave->ibuff >= wave->bufferend){
             //reload internal buffer
             fread(wave->buffer, bufferlength, 1, wave->fp);
             wave->ibuff = wave->buffer;
-            wave->pcmsread = ftell(wave->fp) - wave->internalstart; 
-            printf("pcm bytes read = %ld \n", wave->pcmsread);
+            //printf("pcm bytes read = %ld, samples left = %d \n", wave->pcmsread, samplesleft);
         }
     }
     return bytes;
@@ -303,12 +308,23 @@ mkbuffer(wave_t *wave, int length)
     int16_t blockalign = wave->fmt->block_align;
     int16_t samplealign = blockalign/channels;
 
+
     ptr = malloc(channels * sizeof(char *));
     for(int dim = 0; dim < channels; dim++){
         ptr[dim] = calloc(length, samplealign);
     }
     return ptr;
 }
+
+int
+rmbuffer(wave_t *wave, char **ptr)
+{
+    for(short dim = 0; dim < wave->fmt->channels; dim++){
+        free(ptr[dim]);
+    }
+    free(ptr);
+    return 0;
+}    
 
 int
 wavegetprop(wave_t *wave, wave_prop_t prop, void *data)
@@ -336,7 +352,7 @@ wavegetprop(wave_t *wave, wave_prop_t prop, void *data)
             *(int16_t *)data = wave->fmt->bits_per_sample;
             return 0;
         case WAVE_LENGTH:
-            *(int32_t *)data = wave->dataheader->length / (wave->fmt->bits_per_sample / 8) / wave->fmt->sample_rate;
+            *(int32_t *)data = wave->dataheader->length / (wave->fmt->bits_per_sample / 8); /* / wave->fmt->sample_rate;*/
             return 0;
         default:
             /* property not defined*/
