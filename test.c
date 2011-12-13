@@ -51,7 +51,9 @@ main(int argc, char *argv[])
 {
     FILE *fd;
     wave_t *wave;
+    buffer_t *buffer;
     int bytesread;
+    int length;
 
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <file>\n", argv[0]);
@@ -68,16 +70,14 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    int length;
     wavegetprop(wave, WAVE_LENGTH, &length);
-    length = length + 18;
-    char **pcm = mkbuffer(wave, length);
+    buffer = mkbuffer(wave, buffer, length + 18);
 
-    if (!(bytesread = getpcm(wave, length, pcm))) {
+    if (!(bytesread = getpcm(wave, buffer))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
-    
+   /* 
     rmbuffer(wave, pcm);
 
     length = 30;
@@ -87,9 +87,9 @@ main(int argc, char *argv[])
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
-   
+  */ 
     int16_t **sample; 
-    sample = (int16_t **)pcm; 
+    sample = (int16_t **)buffer->pcm; 
 
     for(int i = 0; i < length; i++){
         printf("sample %d = %i \n", i, sample[0][i]);
@@ -97,7 +97,7 @@ main(int argc, char *argv[])
 
     print_waveinfo(wave);
 
-    rmbuffer(wave, pcm);
+    rmbuffer(wave, buffer);
     waveclose(wave);
     fclose(fd);
     return 0;

@@ -9,6 +9,11 @@
 struct wave;
 typedef struct wave wave_t;
 
+typedef struct {
+    char** pcm;
+    int length;
+} buffer_t;
+
 typedef enum {
     WAVE_FILESIZE,
     WAVE_COMPRESS_CODE,
@@ -23,7 +28,7 @@ typedef enum {
 
 /**********************************************************************
   Opens a wave file pointed to by *file, 
-  if buffersize is not specified waveopen grabs the 
+  if buffersizj is not specified waveopen grabs the 
   entire files worth of pcm and places it in the wave stuctures
   wave_data_chunk->pcm[] field
 
@@ -40,8 +45,8 @@ wave_t *waveopen(FILE *file);
   ********************************************************************/
 int waveclose(wave_t *wave);
 int getpcm(wave_t *wave, int length, char **ptr);
-char **mkbuffer(wave_t *wave, int length);
-int rmbuffer(wave_t *wave, char **ptr);
+buffer_t  *mkbuffer(wave_t *wave, buffer_t *buffer, int length);
+int rmbuffer(wave_t *wave, buffer_t *buffer);
 int wavegetprop(wave_t *wave, wave_prop_t prop, void *data);
 int waveseek(wave_t *wave, long offset, int whence);
 int waveeof(wave_t *wave);

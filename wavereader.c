@@ -183,7 +183,8 @@ build_toc(wave_t *wave)
     }
 }
 
-wave_t *waveopen(FILE *fp)
+wave_t *
+waveopen(FILE *fp)
 {
     wave_t *wave = NULL;
     int32_t header[3];
@@ -256,7 +257,7 @@ waveclose(wave_t *wave)
 /* Use this function for reading pcm data.  Do not expect
 things like channels or buffering to be handled for you.*/
 int 
-getpcm(wave_t *wave, int length, char **ptr)
+getpcm(wave_t *wave, buffer_t *buffer)//char **ptr)
 {
     int16_t channels = wave->fmt->channels;
     int16_t blockalign = wave->fmt->block_align;
@@ -276,11 +277,14 @@ getpcm(wave_t *wave, int length, char **ptr)
     }
 
     // Copy data into ptr
-    for(isample = 0; isample < length; isample++ ){     // each sample
+    for(isample = 0; isample < length; isample++ ){ 
+        // each sample
 
-        for(dim = 0; dim < channels; dim++){            // each channel
+        for(dim = 0; dim < channels; dim++){            
+            // each channel
 
-            for(ibyte = 0; ibyte < samplealign; ibyte++){   // each byte
+            for(ibyte = 0; ibyte < samplealign; ibyte++){   
+                // each byte
 
                 ptr[dim][ibyte+isample*samplealign] = *(wave->ibuff + (ibyte + dim*samplealign));
                 
@@ -294,35 +298,38 @@ getpcm(wave_t *wave, int length, char **ptr)
             //reload internal buffer
             fread(wave->buffer, bufferlength, 1, wave->fp);
             wave->ibuff = wave->buffer;
-            //printf("pcm bytes read = %ld, samples left = %d \n", wave->pcmsread, samplesleft);
         }
     }
     return bytes;
 }
 
-char **
-mkbuffer(wave_t *wave, int length)
+buffer_t  *
+mkbuffer(wave_t *wave, buffer_t *buffer, int length)
 {
-    char **ptr = NULL;
+    //char **ptr = NULL;
+    buffer->length = length;
     int16_t channels = wave->fmt->channels;
     int16_t blockalign = wave->fmt->block_align;
     int16_t samplealign = blockalign/channels;
 
-
-    ptr = malloc(channels * sizeof(char *));
+    //ptr = malloc(channels * sizeof(char *));
     for(int dim = 0; dim < channels; dim++){
-        ptr[dim] = calloc(length, samplealign);
+        //ptr[dim] = calloc(length, samplealign);
+        buffer->pcm[dim]= calloc(length, samplealign);
     }
-    return ptr;
+    //return ptr;
+    return buffer;
 }
 
 int
-rmbuffer(wave_t *wave, char **ptr)
+rmbuffer(wave_t *wave, buffer_t *buffer)
 {
     for(short dim = 0; dim < wave->fmt->channels; dim++){
-        free(ptr[dim]);
+        //free(ptr[dim]);
+        free(buffer->pcm[dim]);
     }
-    free(ptr);
+    //free(ptr);
+    free(buffer->pcm);
     return 0;
 }    
 
