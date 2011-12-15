@@ -10,8 +10,9 @@ struct wave;
 typedef struct wave wave_t;
 
 typedef struct {
-    char** pcm;
-    int length;
+    char **pcm;
+    size_t length;
+    double **vector;
 } buffer_t;
 
 typedef enum {
@@ -27,10 +28,9 @@ typedef enum {
 } wave_prop_t;
 
 /**********************************************************************
-  Opens a wave file pointed to by *file, 
-  if buffersizj is not specified waveopen grabs the 
-  entire files worth of pcm and places it in the wave stuctures
-  wave_data_chunk->pcm[] field
+ Opens a wave file pointed to by *file, and parses all sub-chunks.
+ PCM can be obtained by creating a buffer of 'length' samples using 
+ mkbuffer and reading 'length' samples from the .wav using getpcm.
 
  Inputs:
       *file		  :  file pointer as specified in stdio.h
@@ -39,16 +39,15 @@ typedef enum {
                      Currently data is read lazily as long as buffersize is specified.
   ********************************************************************/
 wave_t *waveopen(FILE *file);
-
+int waveclose(wave_t *wave);
 /**********************************************************************
  Closes the wave file and frees memory.
   ********************************************************************/
-int waveclose(wave_t *wave);
 int getpcm(wave_t *wave, buffer_t *buffer);
 buffer_t  *mkbuffer(wave_t *wave, int length);
 int rmbuffer(wave_t *wave, buffer_t *buffer);
 int wavegetprop(wave_t *wave, wave_prop_t prop, void *data);
 int waveseek(wave_t *wave, long offset, int whence);
 int waveeof(wave_t *wave);
-
+double char2double(wave_t *wave, buffer_t *buffer);
 #endif

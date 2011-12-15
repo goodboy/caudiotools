@@ -256,7 +256,7 @@ waveclose(wave_t *wave)
 /* Use this function for reading pcm data.  Do not expect
 things like channels or buffering to be handled for you.*/
 int 
-getpcm(wave_t *wave, buffer_t *buffer)//char **ptr)
+getpcm(wave_t *wave, buffer_t *buffer)
 {
     int16_t channels = wave->fmt->channels;
     int16_t blockalign = wave->fmt->block_align;
@@ -307,11 +307,11 @@ mkbuffer(wave_t *wave, int length)
 {
     int16_t samplealign = wave->fmt->block_align/wave->fmt->channels;
     buffer_t *buffer = malloc(sizeof(buffer_t));
-    buffer->length = length;
+    buffer->length = (size_t)length;
 
     buffer->pcm = malloc(wave->fmt->channels* sizeof(char *));
     for(int dim = 0; dim < wave->fmt->channels; dim++){
-        buffer->pcm[dim]= calloc(length, samplealign);
+        buffer->pcm[dim]= calloc((size_t)length, (size_t)samplealign);
     }
     return buffer;
 }
@@ -353,7 +353,7 @@ wavegetprop(wave_t *wave, wave_prop_t prop, void *data)
             *(int16_t *)data = wave->fmt->bits_per_sample;
             return 0;
         case WAVE_LENGTH:
-            *(int32_t *)data = wave->dataheader->length / wave->fmt->block_align; /* / wave->fmt->sample_rate;*/
+            *(int32_t *)data = wave->dataheader->length / wave->fmt->block_align; 
             return 0;
         default:
             /* property not defined*/
@@ -373,4 +373,29 @@ waveeof(wave_t *wave)
 {
     /* TODO */
     return 0;
+}
+
+double 
+char2double(wave_t *wave, buffer_t *buffer)
+{
+//x[i + 0] << 24 || x[i + 1] << 16 || x[i + 2] << 8 || x[i + 3] / (double)(2 << bitdepth)
+
+    int16_t samplealign = wave->fmt->block_align/wave->fmt->channels;
+    int accum = 0;
+    int ibyte;
+    double result;
+
+    /* allocate for vector of doubles */
+    buffer->vector = malloc(wave->fmt->channels * sizeof(double *));
+    for(int dim = 0; dim < wave->fmt->channels; dim++){
+        buffer->vector[dim]= calloc(buffer->length, (size_t)sizeof(double));
+    } 
+    
+    for(ibyte = samplealign - 1; ibyte > -1; ibyte--) {
+        accum <<= 8;
+        accum |= buffer->pcm[0][ibyte]; //*++x
+    }
+    result = (double)(2 << wave->fmt->bits_per_sample);
+    result = accum / result;
+    return result;
 }

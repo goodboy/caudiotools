@@ -72,11 +72,14 @@ main(int argc, char *argv[])
     int16_t **sample; 
     sample = (int16_t **)buffer->pcm; 
 
-    for(int i = 0; i < buffer->length; i++){
+    /*for(int i = 0; i < buffer->length; i++){
         printf("sample %d = %i \n", i, sample[0][i]);
-    }
+    }*/
 
     print_waveinfo(wave);
+
+    double result = char2double(wave, buffer);
+    printf("double = %f \n", result);
 
     rmbuffer(wave, buffer);
     waveclose(wave);
