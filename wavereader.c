@@ -395,7 +395,6 @@ char2double(wave_t *wave, buffer_t *buffer)
         accum <<= 8;
         accum |= buffer->pcm[0][ibyte] & 0xff; //*++x
     }
-    result = (double)(1 << wave->fmt->bits_per_sample - 1);
-    result = accum / result;
+    result = accum / ((double)(1 << (wave->fmt->bits_per_sample - 1)));
     return result;
 }
