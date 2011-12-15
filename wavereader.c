@@ -308,9 +308,10 @@ mkbuffer(wave_t *wave, int length)
     int16_t samplealign = wave->fmt->block_align/wave->fmt->channels;
     buffer_t *buffer = malloc(sizeof(buffer_t));
     buffer->length = (size_t)length;
+    int dim;
 
     buffer->pcm = malloc(wave->fmt->channels* sizeof(char *));
-    for(int dim = 0; dim < wave->fmt->channels; dim++) {
+    for(dim = 0; dim < wave->fmt->channels; dim++) {
         buffer->pcm[dim]= calloc((size_t)length, (size_t)samplealign);
     }
     return buffer;
@@ -378,23 +379,40 @@ waveeof(wave_t *wave)
 double 
 char2double(wave_t *wave, buffer_t *buffer)
 {
-//x[i + 0] << 24 || x[i + 1] << 16 || x[i + 2] << 8 || x[i + 3] / (double)(2 << bitdepth)
-
     int16_t samplealign = wave->fmt->block_align/wave->fmt->channels;
-    int accum = 0;
+    int32_t accum = 0;
+    int16_t bitdepth = wave->fmt->bits_per_sample;
+    int isample;
+    int dim;
     int ibyte;
     double result;
 
     /* allocate for vector of doubles */
     buffer->vector = malloc(wave->fmt->channels * sizeof(double *));
-    for(int dim = 0; dim < wave->fmt->channels; dim++) {
+    for(dim = 0; dim < wave->fmt->channels; dim++) {
         buffer->vector[dim]= calloc(buffer->length, sizeof(double));
     } 
     
-    for(ibyte = samplealign - 1; ibyte > -1; ibyte--) {
-        accum <<= 8;
-        accum |= buffer->pcm[0][ibyte] & 0xff; //*++x
+    /* create vector of doubles */
+    for(isample = 0; isample < buffer->length; isample++ ) { 
+        // each sample
+
+        for(dim = 0; dim < wave->fmt->channels; dim++) {            
+            // each channel
+                
+            for(ibyte = samplealign - 1; ibyte > -1; ibyte--) {
+                // each byte
+                accum <<= 8;
+                accum |= buffer->pcm[dim][ibyte + isample * samplealign] & 0xff; 
+            }
+            //if(bitdepth == 16)
+                //accum = accum & 0xffff;
+
+            result = (int16_t)(0x0000ffff & accum ) / ((double)((1 << (bitdepth- 1))- 1));
+            accum = 0;
+            buffer->vector[dim][isample] = result;
+        }
     }
-    result = accum / ((double)(1 << (wave->fmt->bits_per_sample - 1)));
-    return result;
+    
+    return 0;
 }
