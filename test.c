@@ -42,8 +42,10 @@ int
 main(int argc, char *argv[])
 {
     FILE *fd;
-    wave_t *wave;
-    buffer_t *buffer;
+    wave_t *wave1;
+    wave_t *wave2;
+    buffer_t *buffer1;
+    buffer_t *buffer2;
     int bytesread;
     int length = 512;
 
@@ -75,11 +77,11 @@ main(int argc, char *argv[])
     buffer1 = mkbuffer(wave1, length);
     buffer2 = mkbuffer(wave2, length);
 
-    if (!(bytesread = getpcm(wave1, buffer))) {
+    if (!(bytesread = getpcm(wave1, buffer1))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
-    if (!(bytesread = getpcm(wave2, buffer))) {
+    if (!(bytesread = getpcm(wave2, buffer2))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
@@ -95,10 +97,12 @@ main(int argc, char *argv[])
         printf("sample %d = %f \n", i, buffer->vector[0][i]);
     */
 
-    print_waveinfo(wave);
+    print_waveinfo(wave1);
 
-    rmbuffer(wave, buffer);
-    waveclose(wave);
+    rmbuffer(wave1, buffer1);
+    rmbuffer(wave2, buffer2);
+    waveclose(wave1);
+    waveclose(wave2);
     fclose(fd);
     return 0;
 }
