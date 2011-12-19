@@ -1,21 +1,24 @@
-C = gcc
+CC = gcc
 CFLAGS = -Wall -pedantic -std=gnu99 -g
-LDFLAGS =
+LDFLAGS = -lm
 
-OBJ = wavereader.o test.o
+OBJ = wavereader.o test.o stat.o
 
 all: wread
 
-wread: ${OBJ}
+wread: $(OBJ)
 	@echo CC -o $@
-	@${CC} -o $@ ${OBJ} ${LDFLAGS}
+	@$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
 %.o: %.c
 	@echo CC $@
-	@${CC} -o $@ -c ${CFLAGS} $<
+	@$(CC) -o $@ -c $(CFLAGS) $<
 
 clean:
 	@echo cleaning up...
 	@rm *.o wread
+
+run:
+	@./wread ./wavs/Square1.wav
 
 .PHONY: all clean

@@ -1,5 +1,5 @@
-#ifndef WAVEREADER_46GP1GUA
-#define WAVEREADER_46GP1GUA
+#ifndef WAVEREADER_H
+#define WAVEREADER_H
 
 #include <stdio.h>
 #include <stdlib.h>
