@@ -52,20 +52,34 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    // LOAD wave to compare with Square1.wav
     if (!(fd = fopen(argv[1], "rb"))) {
         fprintf(stderr, "Couldn't open \"%s\".\n", argv[1]);
         exit(EXIT_FAILURE);
     }
-
-    if (!(wave = waveopen(fd))) {
+    if (!(wave2 = waveopen(fd))) {
+        fprintf(stderr, "Couldn't open \"%s\" as a .wav file.\n", argv[1]);
+        exit(EXIT_FAILURE);
+    }
+    // LOAD Square1.wav
+    if (!(fd = fopen("./wavs/Square1.wav", "rb"))) {
+        fprintf(stderr, "Couldn't open \"%s\".\n", "Square1.wav");
+        exit(EXIT_FAILURE);
+    }
+    if (!(wave1 = waveopen(fd))) {
         fprintf(stderr, "Couldn't open \"%s\" as a .wav file.\n", argv[1]);
         exit(EXIT_FAILURE);
     }
 
-    wavegetprop(wave, WAVE_LENGTH, &length);
-    buffer = mkbuffer(wave, length);
+    wavegetprop(wave1, WAVE_LENGTH, &length);
+    buffer1 = mkbuffer(wave1, length);
+    buffer2 = mkbuffer(wave2, length);
 
-    if (!(bytesread = getpcm(wave, buffer))) {
+    if (!(bytesread = getpcm(wave1, buffer))) {
+        fprintf(stderr, "Couldn't stream pcm data!\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(bytesread = getpcm(wave2, buffer))) {
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
@@ -76,9 +90,10 @@ main(int argc, char *argv[])
         printf("sample %d = %i \n", i, sample[0][i]);
     }*/
 
-    char2double(wave, buffer);
+    /* char2double(wave, buffer);
     for(int i = 0; i < buffer->length; i++)
         printf("sample %d = %f \n", i, buffer->vector[0][i]);
+    */
 
     print_waveinfo(wave);
 

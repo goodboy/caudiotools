@@ -14,7 +14,7 @@
 ((char *)a)[0] == 0xff <-- most */
 
 
-double *
+double **
 xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2);
 
 

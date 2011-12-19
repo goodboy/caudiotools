@@ -10,18 +10,17 @@
 ((char *)a)[0] == 0xff <-- most */
 
 
-double *
+double **
 xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
 {
     //THE SHITTY O(n^2) way! (i.e. not using fft)
     int i,j; 
     double mx,my,sx,sy,sxy,denom;
-    double n;
+    double n;       // length of longest vector
 
-    double *x;// = sig1->vector[0];
     double *small;
     double *big;
-    double *R;
+    double **R;
 
     /* hack to match vector lengths by zero padding */
     if(sig1->length >= sig2->length) {
@@ -34,17 +33,17 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
         big = sig2->vector[0];
     }
 
-    double y[(int)n];
+    double y[(size_t)n];
     //y = calloc(n, sizeof(double));
     for(i = 0; i < n; i++) 
         y[i] = small[i];
-
-
-
-    if(maxdelay == 0)
-        maxdelay = 2*n;
     
-    R = calloc(2*n - 1, sizeof(double));
+    double *x = big;
+    
+    /* allocate mem for output correlations and lags */
+    R = malloc(2 * sizeof(double *));
+    R[0] = calloc((size_t)(2*n - 1), sizeof(double));
+    R[1] = calloc((size_t)(2*n - 1), sizeof(double));
 
     /*calculate the mean of the two series x[], y[] */
     mx = 0;
@@ -68,18 +67,25 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
     denom = sqrt(sx * sy);
 
     /* Calculate the correlation series */
-    
-    for (int delay = -maxdelay; delay < maxdelay; delay++) {
+
+    if(maxdelay == 0)
+        maxdelay = n - 1;    
+
+    int delay = -maxdelay;
+
+    for (int index = 0; delay < 2*n; index++) {
         sxy=0;
         for(i = 0; i < n; i ++) {
             j = i + delay;
             if(j < 0 || j >= n)
                 continue;
-            /* OR? sxy += (x[i] - mx) * (- my); */
+               //OR? sxy += (x[i] - mx) * (- my); 
             else
                 sxy += (x[i] - mx) * (y[j] - my);
         } 
-        R[delay] = sxy / denom;
+        R[0][index] = -delay;
+        R[1][index] = sxy / denom;
+        delay ++;
     }
     return R;
 }
