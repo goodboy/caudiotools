@@ -4,10 +4,6 @@
 #include "wavereader.h"
 #include "stat.h"
 
-/*short a = 0xff00
-(char[])a[0] == 0xff
-((char [])a)[0] == 0xff
-((char *)a)[0] == 0xff <-- most */
 
 
 double **
@@ -16,7 +12,7 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
     //THE SHITTY O(n^2) way! (i.e. not using fft)
     int i,j; 
     double mx,my,sx,sy,sxy,denom;
-    double n;       // length of longest vector
+    size_t n;       // length of longest vector
 
     double *small;
     double *big;
@@ -33,7 +29,7 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
         big = sig2->vector[0];
     }
 
-    double y[(size_t)n];
+    double y[n];
     //y = calloc(n, sizeof(double));
     for(i = 0; i < n; i++) 
         y[i] = small[i];
@@ -73,7 +69,7 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
 
     int delay = -maxdelay;
 
-    for (int index = 0; delay < 2*n; index++) {
+    for (int index = 0; index < 2*n; index++) {
         sxy=0;
         for(i = 0; i < n; i ++) {
             j = i + delay;
@@ -101,3 +97,8 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
             sxy += (x[i] - mx) * (y[j] - my);
         }
         R = sxy / denom;*/
+
+/*short a = 0xff00
+(char[])a[0] == 0xff
+((char [])a)[0] == 0xff
+((char *)a)[0] == 0xff <-- most */
