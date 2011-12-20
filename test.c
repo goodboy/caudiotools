@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "wavereader.h"
+#include "stats.h"
 
 void
 print_waveinfo(wave_t *wave)
@@ -64,7 +65,7 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     // LOAD Square1.wav
-    if (!(fd = fopen("./wavs/Square1.wav", "rb"))) {
+    if (!(fd = fopen("./wavs/Pulse1.wav", "rb"))) {
         fprintf(stderr, "Couldn't open \"%s\".\n", "Square1.wav");
         exit(EXIT_FAILURE);
     }
@@ -74,6 +75,7 @@ main(int argc, char *argv[])
     }
 
     wavegetprop(wave1, WAVE_LENGTH, &length);
+    //length = 16;
     buffer1 = mkbuffer(wave1, length);
     buffer2 = mkbuffer(wave2, length);
 
@@ -85,6 +87,9 @@ main(int argc, char *argv[])
         fprintf(stderr, "Couldn't stream pcm data!\n");
         exit(EXIT_FAILURE);
     }
+
+    char2double(wave1, buffer1);
+    char2double(wave2, buffer2);
     /*int16_t **sample; 
     sample = (int16_t **)buffer->pcm; 
 
@@ -92,13 +97,17 @@ main(int argc, char *argv[])
         printf("sample %d = %i \n", i, sample[0][i]);
     }*/
 
-    /* char2double(wave, buffer);
-    for(int i = 0; i < buffer->length; i++)
-        printf("sample %d = %f \n", i, buffer->vector[0][i]);
-    */
-
     print_waveinfo(wave1);
 
+    /* Test signal processing routines
+     --------------------------------------------------------------*/
+    double **R = xcorr(0, buffer1, buffer2);
+
+    for(int i = (2*1024 -1) - 300; i < buffer->length; i++)
+        printf("sample %d = %f \n", i, buffer->vector[0][i]);
+
+
+    free(R);
     rmbuffer(wave1, buffer1);
     rmbuffer(wave2, buffer2);
     waveclose(wave1);
