@@ -63,25 +63,26 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
     denom = sqrt(sx * sy);
 
     /* Calculate the correlation series */
-
+    /* R(lag) = E[y(i+lag)*(x(i))] */
+    
     if(maxdelay == 0)
         maxdelay = n - 1;    
 
-    int delay = -maxdelay;
+    double lag = -maxdelay;
 
     for (int index = 0; index < 2*n; index++) {
         sxy=0;
         for(i = 0; i < n; i ++) {
-            j = i + delay;
+            j = i + lag;
             if(j < 0 || j >= n)
                 continue;
                //OR? sxy += (x[i] - mx) * (- my); 
             else
                 sxy += (x[i] - mx) * (y[j] - my);
         } 
-        R[0][index] = -delay;
+        R[0][index] = lag;
         R[1][index] = sxy / denom;
-        delay ++;
+        lag ++;
     }
     return R;
 }

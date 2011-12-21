@@ -97,16 +97,15 @@ main(int argc, char *argv[])
         printf("sample %d = %i \n", i, sample[0][i]);
     }*/
 
-    print_waveinfo(wave1);
-
     /* Test signal processing routines
      --------------------------------------------------------------*/
     double **R = xcorr(0, buffer1, buffer2);
 
-    for(int i = (2*1024 -1) - 300; i < buffer->length; i++)
-        printf("sample %d = %f \n", i, buffer->vector[0][i]);
+    for(int i = 1024 - 300; i < 1024 + 300; i++)
+        printf("index %d R=%f @ lag = %f \n", i, R[1][i],R[0][i]);
+    /* look at the output and lag 100 should have R ~= 1;*/
 
-
+    print_waveinfo(wave1);
     free(R);
     rmbuffer(wave1, buffer1);
     rmbuffer(wave2, buffer2);

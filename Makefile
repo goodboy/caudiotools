@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -pedantic -std=gnu99 -g
 LDFLAGS = -lm
 
-OBJ = wavereader.o test.o stat.o
+OBJ = wavereader.o test.o stats.o
 
 all: wread
 
@@ -19,6 +19,6 @@ clean:
 	@rm *.o wread
 
 run:
-	@./wread ./wavs/Square1.wav
+	@./wread ./wavs/Pulse2.wav
 
 .PHONY: all clean
