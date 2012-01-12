@@ -56,8 +56,8 @@ struct wave {
     struct wave_fmt_chunk *fmt;
     long pcmsread;
     long internalstart;
-    char *buffer;
-    char *bufferend;
+    char *buffer;                   //start of internal buffer
+    char *bufferend;                //end of internal buffer
     char *ibuff;
     size_t bufferlength;
 };
@@ -408,7 +408,7 @@ char2double(wave_t *wave, buffer_t *buffer)
             //if(bitdepth == 16)
                 //accum = accum & 0xffff;
 
-            result = (int16_t)(0x0000ffff & accum ) / ((double)((1 << (bitdepth- 1))- 1));
+            result = (int16_t)(0x0000ffff & accum ) / ((double)((1 << (bitdepth-1))- 1));
             accum = 0;
             buffer->vector[dim][isample] = result;
         }

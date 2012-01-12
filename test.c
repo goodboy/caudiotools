@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "wavereader.h"
 #include "stats.h"
+#include "sort.h"
+
 
 void
 print_waveinfo(wave_t *wave)
@@ -100,6 +102,16 @@ main(int argc, char *argv[])
     /* Test signal processing routines
      --------------------------------------------------------------*/
     double **R = xcorr(0, buffer1, buffer2);
+    
+    //mergesort(R[1], 2*length - 1);
+    /*for(i=1; i<size; i++) {
+        if (!(a[i-1] <= a[i])) {
+            puts("ERROR");
+            return -1;
+        }
+    }
+    puts("SUCCESS");
+    return 0;*/
 
     for(int i = 1024 - 300; i < 1024 + 300; i++)
         printf("index %d R=%f @ lag = %f \n", i, R[1][i],R[0][i]);

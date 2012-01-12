@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -pedantic -std=gnu99 -g
-LDFLAGS = -lm
+LDFLAGS = -lm	
 
-OBJ = wavereader.o test.o stats.o
+OBJ = wavereader.o test.o stats.o mergesort.o
 
 all: wread
 
