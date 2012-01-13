@@ -247,8 +247,9 @@ waveclose(wave_t *wave)
         entry = entry->next;
         free(temp);
     }
-
+    free(wave->buffer);
     free(wave->fmt);
+    free(wave->dataheader);
     free(wave);
     return 0;
 }
@@ -310,7 +311,7 @@ mkbuffer(wave_t *wave, int length)
     buffer->length = (size_t)length;
     int dim;
 
-    buffer->pcm = malloc(wave->fmt->channels* sizeof(char *));
+    buffer->pcm = malloc(wave->fmt->channels * sizeof(char *));
     for(dim = 0; dim < wave->fmt->channels; dim++) {
         buffer->pcm[dim]= calloc((size_t)length, (size_t)samplealign);
     }
@@ -322,8 +323,12 @@ rmbuffer(wave_t *wave, buffer_t *buffer)
 {
     for(short dim = 0; dim < wave->fmt->channels; dim++) {
         free(buffer->pcm[dim]);
+        if(buffer->vector[dim])
+            free(buffer->vector[dim]);
     }
     free(buffer->pcm);
+    if(buffer->vector)
+        free(buffer->vector);
     free(buffer);
     return 0;
 }    

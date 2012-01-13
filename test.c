@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include "wavereader.h"
 #include "stats.h"
-#include "sort.h"
 
 
 void
@@ -66,7 +65,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "Couldn't open \"%s\" as a .wav file.\n", argv[1]);
         exit(EXIT_FAILURE);
     }
-    // LOAD Square1.wav
+    // LOAD Pulse1.wav
     if (!(fd = fopen("./wavs/Pulse1.wav", "rb"))) {
         fprintf(stderr, "Couldn't open \"%s\".\n", "Square1.wav");
         exit(EXIT_FAILURE);
@@ -102,22 +101,14 @@ main(int argc, char *argv[])
     /* Test signal processing routines
      --------------------------------------------------------------*/
     double **R = xcorr(0, buffer1, buffer2);
-    
-    //mergesort(R[1], 2*length - 1);
-    /*for(i=1; i<size; i++) {
-        if (!(a[i-1] <= a[i])) {
-            puts("ERROR");
-            return -1;
-        }
-    }
-    puts("SUCCESS");
-    return 0;*/
+    //qsort(blah blah blah);
 
-    for(int i = 1024 - 300; i < 1024 + 300; i++)
+/*    for(int i = 1024 - 300; i < 1024 + 300; i++)
         printf("index %d R=%f @ lag = %f \n", i, R[1][i],R[0][i]);
     /* look at the output and lag 100 should have R ~= 1;*/
 
     print_waveinfo(wave1);
+    
     free(R);
     rmbuffer(wave1, buffer1);
     rmbuffer(wave2, buffer2);
