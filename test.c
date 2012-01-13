@@ -109,6 +109,8 @@ main(int argc, char *argv[])
 
     print_waveinfo(wave1);
     
+    free(R[0]);
+    free(R[1]);
     free(R);
     rmbuffer(wave1, buffer1);
     rmbuffer(wave2, buffer2);
