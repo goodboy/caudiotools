@@ -45,7 +45,8 @@ print_waveinfo(wave_t *wave)
 int
 main(int argc, char *argv[])
 {
-    FILE *fd;
+    FILE *fd1;
+    FILE *fd2;
     wave_t *wave1;
     wave_t *wave2;
     buffer_t *buffer1;
@@ -59,20 +60,20 @@ main(int argc, char *argv[])
     }
 
     // LOAD wave to compare with Square1.wav
-    if (!(fd = fopen(argv[1], "rb"))) {
+    if (!(fd1 = fopen(argv[1], "rb"))) {
         fprintf(stderr, "Couldn't open \"%s\".\n", argv[1]);
         exit(EXIT_FAILURE);
     }
-    if (!(wave2 = waveopen(fd))) {
+    if (!(wave2 = waveopen(fd1))) {
         fprintf(stderr, "Couldn't open \"%s\" as a .wav file.\n", argv[1]);
         exit(EXIT_FAILURE);
     }
     // LOAD Pulse1.wav
-    if (!(fd = fopen("./wavs/Pulse1.wav", "rb"))) {
+    if (!(fd2 = fopen("./wavs/Pulse1.wav", "rb"))) {
         fprintf(stderr, "Couldn't open \"%s\".\n", "Square1.wav");
         exit(EXIT_FAILURE);
     }
-    if (!(wave1 = waveopen(fd))) {
+    if (!(wave1 = waveopen(fd2))) {
         fprintf(stderr, "Couldn't open \"%s\" as a .wav file.\n", argv[1]);
         exit(EXIT_FAILURE);
     }
@@ -103,7 +104,7 @@ main(int argc, char *argv[])
     /* Test signal processing routines
      --------------------------------------------------------------*/
     double **R = xcorr(0, buffer1, buffer2);
-    qsort(R[1], 2*length - 1, sizeof(double), &doublecmp);
+    qsort(R[1], 2*length - 1, sizeof(double), doublecmp);
 
 /*    for(int i = 1024 - 300; i < 1024 + 300; i++)
         printf("index %d R=%f @ lag = %f \n", i, R[1][i],R[0][i]);
@@ -119,7 +120,8 @@ main(int argc, char *argv[])
     rmbuffer(wave2, buffer2);
     waveclose(wave1);
     waveclose(wave2);
-    fclose(fd);
+    fclose(fd1);
+    fclose(fd2);
     return 0;
 }
 

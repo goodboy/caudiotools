@@ -55,7 +55,7 @@ struct wave {
     struct wave_toc *toc;
     struct wave_fmt_chunk *fmt;
     long pcmsread;
-    long internalstart;
+    //long internalstart;
     char *buffer;                   //start of internal buffer
     char *bufferend;                //end of internal buffer
     char *ibuff;
@@ -135,7 +135,7 @@ read_chunk(wave_t *wave, int id)
 
         fseek(wave->fp, entry->offset, SEEK_SET);
         fread(wave->dataheader, chunk_size, 1, wave->fp);
-        wave->internalstart = ftell(wave->fp);
+        //wave->internalstart = ftell(wave->fp);
         fread(wave->buffer, (size_t)wave->fmt->block_align, wave->bufferlength, wave->fp);
 
         return NULL;
@@ -226,6 +226,7 @@ waveopen(FILE *fp)
     /* allocate mem for internal buffer of 512 samples and set pointer to 
     end : 512 samples are allocated regardless of the number of channels */
 
+    wave->pcmsread = 0;
     wave->buffer = malloc(wave->bufferlength * wave->fmt->block_align);
     wave->bufferend = wave->buffer + (wave->bufferlength * wave->fmt->block_align);
     wave->ibuff = wave->buffer;
@@ -278,13 +279,13 @@ getpcm(wave_t *wave, buffer_t *buffer)
 
     /* Copy data into ptr */
     for(isample = 0; isample < length; isample++ ) { 
-        /* each sample */
+        // each sample
 
         for(dim = 0; dim < channels; dim++) {            
-            /* each channel */
+            // each channel
 
             for(ibyte = 0; ibyte < samplealign; ibyte++) {   
-                /* each byte */
+                // each byte
 
                 buffer->pcm[dim][ibyte+isample*samplealign] = *(wave->ibuff + (ibyte + dim*samplealign));
                 
