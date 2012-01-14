@@ -4,6 +4,8 @@
 #include "wavereader.h"
 #include "stats.h"
 
+//prototypes
+int doublecmp(const void *d1, const void *d2);
 
 void
 print_waveinfo(wave_t *wave)
@@ -101,14 +103,15 @@ main(int argc, char *argv[])
     /* Test signal processing routines
      --------------------------------------------------------------*/
     double **R = xcorr(0, buffer1, buffer2);
-    //qsort(blah blah blah);
+    qsort(R[1], 2*length - 1, sizeof(double), &doublecmp);
 
 /*    for(int i = 1024 - 300; i < 1024 + 300; i++)
         printf("index %d R=%f @ lag = %f \n", i, R[1][i],R[0][i]);
-    /* look at the output and lag 100 should have R ~= 1;*/
+     look at the output and lag 100 should have R ~= 1;*/
 
     print_waveinfo(wave1);
     
+    /* clean up heap allocs */
     free(R[0]);
     free(R[1]);
     free(R);
@@ -118,4 +121,13 @@ main(int argc, char *argv[])
     waveclose(wave2);
     fclose(fd);
     return 0;
+}
+
+int 
+doublecmp(const void *p1, const void *p2)
+{
+    const double *dp1 = (const double *)p1;
+    const double *dp2 = (const double *)p2;
+
+    return (int)(*dp1 - *dp2);
 }

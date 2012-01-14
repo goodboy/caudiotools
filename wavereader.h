@@ -10,9 +10,9 @@ struct wave;
 typedef struct wave wave_t;
 
 typedef struct {
-    char **pcm;
-    size_t length;
-    double **vector;
+    char **pcm;                 // channel(s) of pcm
+    size_t length;              // length of data in samples
+    double **vector;            // vector(s) of normalized samples
 } buffer_t;
 
 typedef enum {

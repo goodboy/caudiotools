@@ -14,32 +14,26 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
     double mx,my,sx,sy,sxy,denom;
     size_t n;       // length of longest vector
 
-    double *small;
-    double *big;
+    double *y;
+    double *x;
     double **R;
 
     /* hack to match vector lengths by zero padding */
     if(sig1->length >= sig2->length) {
         n = sig1->length;
-        small = sig2->vector[0];
-        big = sig1->vector[0];
+        x = sig1->vector[0];
+        y = sig2->vector[0];        //note y is the shifted vector
     }else{
         n = sig2->length;
-        small = sig1->vector[0];
-        big = sig2->vector[0];
+        x = sig2->vector[0];
+        y = sig1->vector[0];
     }
 
-    double y[n];
-    //y = calloc(n, sizeof(double));
-    for(i = 0; i < n; i++) 
-        y[i] = small[i];
-    
-    double *x = big;
     
     /* allocate mem for output correlations and lags */
     R = malloc(2 * sizeof(double *));
-    R[0] = calloc((size_t)(2*n - 1), sizeof(double));
-    R[1] = calloc((size_t)(2*n - 1), sizeof(double));
+    R[0] = calloc((size_t)(2*n - 1), sizeof(double));//contains lags
+    R[1] = calloc((size_t)(2*n - 1), sizeof(double));//contains data
 
     /*calculate the mean of the two series x[], y[] */
     mx = 0;
@@ -53,9 +47,9 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
     my /= n;
 
     /*Calc the denominator*/
-
     sx = 0;
     sy = 0;
+    
     for (i = 0; i < n; i++) {
         sx += (x[i] - mx) * (x[i] - mx);
         sy += (y[i] - my) * (y[i] - my);
@@ -70,7 +64,7 @@ xcorr(int maxdelay, buffer_t *sig1, buffer_t *sig2)
 
     double lag = -maxdelay;
 
-    for (int index = 0; index < 2*n; index++) {
+    for (int index = 0; index < 2*n-1; index++) {
         sxy=0;
         for(i = 0; i < n; i ++) {
             j = i + lag;

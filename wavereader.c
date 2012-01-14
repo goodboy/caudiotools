@@ -276,15 +276,15 @@ getpcm(wave_t *wave, buffer_t *buffer)
         printf("Output truncated to %d samples \n", samplesleft);
     }
 
-    // Copy data into ptr
+    /* Copy data into ptr */
     for(isample = 0; isample < length; isample++ ) { 
-        // each sample
+        /* each sample */
 
         for(dim = 0; dim < channels; dim++) {            
-            // each channel
+            /* each channel */
 
             for(ibyte = 0; ibyte < samplealign; ibyte++) {   
-                // each byte
+                /* each byte */
 
                 buffer->pcm[dim][ibyte+isample*samplealign] = *(wave->ibuff + (ibyte + dim*samplealign));
                 

@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -pedantic -std=gnu99 -g
 LDFLAGS = -lm	
 
-OBJ = wavereader.o test.o stats.o mergesort.o
+OBJ = wavereader.o test.o stats.o 
 
 all: wread
 
@@ -21,4 +21,8 @@ clean:
 run:
 	@./wread ./wavs/Pulse2.wav
 
+mem:
+	@valgrind --leak-check=yes ./wread ./wavs/Pulse1.wav 
+ 
+	
 .PHONY: all clean
