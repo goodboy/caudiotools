@@ -55,7 +55,6 @@ struct wave {
     struct wave_toc *toc;
     struct wave_fmt_chunk *fmt;
     long pcmsread;
-    //long internalstart;
     char *buffer;                   //start of internal buffer
     char *bufferend;                //end of internal buffer
     char *ibuff;
