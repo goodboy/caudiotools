@@ -77,24 +77,26 @@ static void
 dump_toc(wave_t *wave)
 {
     struct wave_toc *entry;
+    static int files;
 
-    printf(">> DUMPING TOC\n");
+    files ++;
+    printf(">> DUMPING TOC: %d\n", files);
     for (entry = wave->toc; entry; entry = entry->next) {
         switch (entry->id) {
             case FMT_CHUNK:
-                printf(" -> fmt chunk\n");
+                printf("   -> fmt chunk\n");
                 break;
             case DATA_CHUNK:
-                printf(" -> data chunk\n");
+                printf("   -> data chunk\n");
                 break;
             case FACT_CHUNK:
-                printf(" -> fact chunk\n");
+                printf("   -> fact chunk\n");
                 break;
             case LIST_CHUNK:
-                printf(" -> LIST chunk\n");
+                printf("   -> LIST chunk\n");
                 break;
             default:
-                printf(" -> unsupported chunk found: ");
+                printf("   -> unsupported chunk found: ");
                 dump_int32(entry->id);
                 printf("\n");
                 break;
@@ -104,7 +106,7 @@ dump_toc(wave_t *wave)
 
 static void
 dump_fmt(struct wave_fmt_chunk *fmt) {
-    printf(">> fmt chunk found (%d bytes long)\n", fmt->h.length);
+    //printf(">> fmt chunk found (%d bytes long)\n", fmt->h.length);
 
     if (fmt->h.length > 16) {
         printf(">> DEBUG: printing fmt_extra\n");
@@ -222,8 +224,9 @@ waveopen(FILE *fp)
     assert(wave->fmt->h.length >= 16);
     dump_fmt(wave->fmt);
 
-    /* allocate mem for internal buffer of 512 samples and set pointer to 
-    end : 512 samples are allocated regardless of the number of channels */
+    /* allocate mem for internal buffer of 'wave->bufferlength' samples and set 
+     * pointer to end. 
+     * ('wave->bufferlength' samples are allocated regardless of the number of channels) */
 
     wave->pcmsread = 0;
     wave->buffer = malloc(wave->bufferlength * wave->fmt->block_align);
@@ -232,7 +235,7 @@ waveopen(FILE *fp)
 
     /* this read fills the buffer and grabs the data header */
     read_chunk(wave, DATA_CHUNK);
-    printf(">> DEBUG: data frame %d bytes\n", wave->dataheader->length);
+    //printf(">> DEBUG: data frame %d bytes\n", wave->dataheader->length);
 
     return wave;
 }
@@ -420,4 +423,46 @@ char2double(wave_t *wave, buffer_t *buffer)
     }
     
     return 0;
+}
+
+/* Prints the standard wave file info 
+ * *********************************/
+void
+print_waveinfo(wave_t *wave)
+{
+    int32_t size, sample_rate, bytes_per_second, length;
+    int16_t pcm, channels, block_align, bits_per_sample;
+    static int prints;
+
+    /* track number of prints */
+    prints++;
+    printf("\nWAVE INFO PRINT: %d\n", prints);
+
+    /* read properties so we can dump wave file information */
+    wavegetprop(wave, WAVE_COMPRESS_CODE, &pcm);
+    wavegetprop(wave, WAVE_CHANNELS, &channels);
+    wavegetprop(wave, WAVE_FILESIZE, &size);
+    wavegetprop(wave, WAVE_SAMPLE_RATE, &sample_rate);
+    wavegetprop(wave, WAVE_BYTES_PER_SEC, &bytes_per_second);
+    wavegetprop(wave, WAVE_BLOCK_ALIGN, &block_align);
+    wavegetprop(wave, WAVE_BITS_PER_SAMPLE, &bits_per_sample);
+    wavegetprop(wave, WAVE_LENGTH, &length);
+
+    if (pcm == 1) {
+        int hours, minutes, seconds = length / sample_rate;
+        minutes = seconds / 60;
+        hours = minutes / 60;
+        seconds %= 60;
+        minutes %= 60;
+
+        printf("uncompressed file: length: %02dh %02dm %02ds\n", hours, minutes, seconds);
+    } else
+        printf("compressed wave file\n");
+
+    printf("size: %d bytes\n", size);
+    printf("channels: %d \n", channels);
+    printf("sample rate: %d Hz\n", sample_rate);
+    printf("average bytes/second: %d\n", bytes_per_second);
+    printf("block align: %d\n", block_align);
+    printf("bits/sample: %d\n", bits_per_sample);
 }

@@ -40,6 +40,8 @@ typedef enum {
   ********************************************************************/
 wave_t *waveopen(FILE *file);
 int waveclose(wave_t *wave);
+
+
 /**********************************************************************
  Closes the wave file and frees memory.
   ********************************************************************/
@@ -50,4 +52,5 @@ int wavegetprop(wave_t *wave, wave_prop_t prop, void *data);
 int waveseek(wave_t *wave, long offset, int whence);
 int waveeof(wave_t *wave);
 double char2double(wave_t *wave, buffer_t *buffer);
+void print_waveinfo(wave_t *wave);
 #endif

@@ -7,41 +7,6 @@
 //prototypes
 int doublecmp(const void *d1, const void *d2);
 
-void
-print_waveinfo(wave_t *wave)
-{
-    int32_t size, sample_rate, bytes_per_second, length;
-    int16_t pcm, channels, block_align, bits_per_sample;
-
-    /* read properties so we can dump wave file information */
-    wavegetprop(wave, WAVE_COMPRESS_CODE, &pcm);
-    wavegetprop(wave, WAVE_CHANNELS, &channels);
-    wavegetprop(wave, WAVE_FILESIZE, &size);
-    wavegetprop(wave, WAVE_SAMPLE_RATE, &sample_rate);
-    wavegetprop(wave, WAVE_BYTES_PER_SEC, &bytes_per_second);
-    wavegetprop(wave, WAVE_BLOCK_ALIGN, &block_align);
-    wavegetprop(wave, WAVE_BITS_PER_SAMPLE, &bits_per_sample);
-    wavegetprop(wave, WAVE_LENGTH, &length);
-
-    if (pcm == 1) {
-        int hours, minutes, seconds = length / sample_rate;
-        minutes = seconds / 60;
-        hours = minutes / 60;
-        seconds %= 60;
-        minutes %= 60;
-
-        printf("uncompressed wave file: length (approx): %02dh %02dm %02ds\n", hours, minutes, seconds);
-    } else
-        printf("compressed wave file\n");
-
-    printf("size: %d bytes\n", size);
-    printf("channels: %d", channels);
-    printf("sample rate: %d Hz\n", sample_rate);
-    printf("average bytes/second %d\n", bytes_per_second);
-    printf("block align: %d\n", block_align);
-    printf("bits/sample: %d\n", bits_per_sample);
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -101,18 +66,22 @@ main(int argc, char *argv[])
         printf("sample %d = %i \n", i, sample[0][i]);
     }*/
 
+    print_waveinfo(wave1);
+
     /* Test signal processing routines
      --------------------------------------------------------------*/
+    printf("\nSIGNAL PROCESSING RESULTS:\n");
+
     double **R = xcorr(0, buffer1, buffer2);
     qsort(R[1], 2*length - 1, sizeof(double), doublecmp);
 
+    printf("max xcorr o/p = %f \n", R[1][2*length-2]);
 /*    for(int i = 1024 - 300; i < 1024 + 300; i++)
         printf("index %d R=%f @ lag = %f \n", i, R[1][i],R[0][i]);
      look at the output and lag 100 should have R ~= 1;*/
 
-    print_waveinfo(wave1);
     
-    /* clean up heap allocs */
+    /* clean up mem allocs */
     free(R[0]);
     free(R[1]);
     free(R);
